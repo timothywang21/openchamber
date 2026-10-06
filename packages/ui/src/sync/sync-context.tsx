@@ -1494,7 +1494,7 @@ async function reloadCatalog(kind: CatalogKind, childStores: ChildStoreManager):
 
   if (kind === "project") {
     const projects = await opencodeClient.listProjects().catch(() => null)
-    if (projects) useGlobalSyncStore.getState().actions.set({ projects })
+    if (projects) useGlobalSyncStore.getState().actions.set({ projects, hasLoadedProjects: true })
     return
   }
   // No sync-store slice of their own: their consumers read them on demand.
