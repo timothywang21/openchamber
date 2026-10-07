@@ -18,7 +18,7 @@ const childProcess = await import('child_process');
 const packageManager = await import('../package-manager.js');
 const { registerOpenChamberRoutes } = await import('./openchamber-routes.js');
 
-const createApp = ({ environment = {}, storedOptions = {}, desktopUpdater, platform = 'linux', execPath = '/usr/bin/node' } = {}) => {
+const createApp = ({ environment = {}, storedOptions = {}, desktopUpdater, platform = 'linux', execPath = '/usr/bin/node', claimOpenCodeProjectImportPrompt = vi.fn(async () => false) } = {}) => {
   const app = express();
   const dependencies = {
     fs: {
@@ -51,6 +51,7 @@ const createApp = ({ environment = {}, storedOptions = {}, desktopUpdater, platf
     modelsDevApiUrl: 'https://models.example.test',
     modelsMetadataCacheTtl: 0,
     readSettingsFromDiskMigrated: vi.fn(),
+    claimOpenCodeProjectImportPrompt,
     fetchFreeZenModels: vi.fn(),
     getCachedZenModels: vi.fn(),
     desktopUpdater,
@@ -74,6 +75,33 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.clearAllMocks();
+});
+
+describe('OpenCode project import prompt claim route', () => {
+  it('returns the atomic claim result from the runtime settings owner', async () => {
+    const claimOpenCodeProjectImportPrompt = vi.fn()
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false);
+    const { app } = createApp({ claimOpenCodeProjectImportPrompt });
+
+    await request(app)
+      .post('/api/openchamber/project-import-prompt/claim')
+      .expect(200, { claimed: true });
+    await request(app)
+      .post('/api/openchamber/project-import-prompt/claim')
+      .expect(200, { claimed: false });
+    expect(claimOpenCodeProjectImportPrompt).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns a server error if the settings owner cannot persist the claim', async () => {
+    const claimOpenCodeProjectImportPrompt = vi.fn(async () => { throw new Error('Read-only settings'); });
+    const { app } = createApp({ claimOpenCodeProjectImportPrompt });
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await request(app)
+      .post('/api/openchamber/project-import-prompt/claim')
+      .expect(500, { error: 'Failed to claim project import prompt' });
+  });
 });
 
 describe('OpenChamber desktop host update route', () => {

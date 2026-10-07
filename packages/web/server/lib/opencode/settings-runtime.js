@@ -1145,11 +1145,29 @@ export const createSettingsRuntime = (deps) => {
     return persistSettingsLock;
   };
 
+  const claimOpenCodeProjectImportPrompt = async () => {
+    let claimed = false;
+    persistSettingsLock = persistSettingsLock.then(async () => {
+      const current = await readSettingsFromDisk();
+      if (current.openCodeProjectImportPromptShown === true) return;
+
+      await writeSettingsToDisk({
+        ...current,
+        openCodeProjectImportPromptShown: true,
+      }, { changedKeys: ['openCodeProjectImportPromptShown'] });
+      claimed = true;
+    });
+
+    await persistSettingsLock;
+    return claimed;
+  };
+
   return {
     readSettingsFromDisk,
     readSettingsFromDiskStrict,
     readSettingsFromDiskMigrated,
     writeSettingsToDisk,
     persistSettings,
+    claimOpenCodeProjectImportPrompt,
   };
 };

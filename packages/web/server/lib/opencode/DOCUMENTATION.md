@@ -57,7 +57,7 @@ unless an output schema is declared; and a tool call no longer receives
 `context.directory` or `context.abort`, so the callback sends `context.sessionID`
 and OpenChamber resolves the directory itself.
 - `packages/web/server/lib/opencode/server-utils-runtime.js`: shared server runtime utilities for OpenCode proxy wiring, OpenCode port/readiness helpers, and snapshot fetchers.
-- `packages/web/server/lib/opencode/openchamber-routes.js`: OpenChamber update and models metadata route registration.
+- `packages/web/server/lib/opencode/openchamber-routes.js`: OpenChamber update and models metadata route registration, including the atomic per-runtime claim for the one-time OpenCode project import prompt. The claim is serialized through `settings-runtime.js` and persisted as an instance-scoped `settings.json` field.
 - `packages/web/server/lib/opencode/pwa-manifest-routes.js`: PWA manifest route registration with recent-session shortcut resolution and short-lived caching.
 - `packages/web/server/lib/opencode/project-icon-routes.js`: project icon upload/read/discovery route registration and icon storage orchestration.
 - `packages/web/server/lib/opencode/skill-routes.js`: route registration for skill config CRUD, supporting files, and skills catalog scan/install flows.

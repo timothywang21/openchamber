@@ -784,6 +784,13 @@ export interface SettingsAPI {
   restartOpenCode?: () => Promise<{ restarted: boolean }>;
 }
 
+export type OpenCodeProjectImportPromptClaimResult = 'claimed' | 'already-claimed' | 'unsupported';
+
+export interface OpenCodeProjectImportPromptAPI {
+  /** Atomically claims the first eligible import prompt for the active runtime. */
+  claim(): Promise<OpenCodeProjectImportPromptClaimResult>;
+}
+
 export interface DirectoryPermissionRequest {
   path: string;
 }
@@ -1525,6 +1532,7 @@ export interface RuntimeAPIs {
     pick(): Promise<{ status: 'unsupported' } | { status: 'picked'; file: { name: string; size: number; text: string } | null }>;
   };
   runtime: RuntimeDescriptor;
+  openCodeProjectImportPrompt: OpenCodeProjectImportPromptAPI;
   terminal: TerminalAPI;
   git: GitAPI;
   files: FilesAPI;
